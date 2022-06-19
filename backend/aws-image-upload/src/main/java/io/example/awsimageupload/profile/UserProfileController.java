@@ -1,12 +1,18 @@
 package io.example.awsimageupload.profile;
 
 import java.util.List;
+import java.util.UUID;
 import jdk.jshell.spi.ExecutionControl.NotImplementedException;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "api/v1/user-profile")
@@ -24,6 +30,15 @@ public class UserProfileController {
     return userProfileService.getUserProfiles();
   }
 
-  // TODO: add upload image
+  @PostMapping(
+      path = "{userProfileId}/image/upload",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public void uploadUserProfileImage(
+      @PathVariable("userProfileId") UUID userProfileId,
+      @RequestParam("file") MultipartFile file) {
+    userProfileService.uploadUserProfileImage(userProfileId, file);
+  }
 
 }
