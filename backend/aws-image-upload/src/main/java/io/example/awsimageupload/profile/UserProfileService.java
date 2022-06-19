@@ -21,5 +21,6 @@ public class UserProfileService {
   }
 
   public void uploadUserProfileImage(UUID userProfileId, MultipartFile file) {
+    // TODO: implement this, store in s3
   }
 }
