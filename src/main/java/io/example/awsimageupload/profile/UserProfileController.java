@@ -6,6 +6,7 @@ import jdk.jshell.spi.ExecutionControl.NotImplementedException;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "api/v1/user-profile")
+@CrossOrigin("*")
 public class UserProfileController {
 
   private final UserProfileService userProfileService;
@@ -39,6 +41,13 @@ public class UserProfileController {
       @PathVariable("userProfileId") UUID userProfileId,
       @RequestParam("file") MultipartFile file) {
     userProfileService.uploadUserProfileImage(userProfileId, file);
+  }
+
+  @GetMapping(path = "{userProfileId}/image/upload")
+  public byte[] downloadUserProfileImage(
+      @PathVariable("userProfileId") UUID userProfileId
+  ) {
+    return userProfileService.downloadUserProfileImage(userProfileId);
   }
 
 }
