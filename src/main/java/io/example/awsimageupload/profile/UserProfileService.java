@@ -55,16 +55,7 @@ public class UserProfileService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, reason);
     }
     // FIXME: user exist in DB
-    UserProfile userProfileFound = userProfileDataAccessService
-        .getUserProfiles()
-        .stream()
-        .filter(userProfile -> userProfile.getUserProfileId().equals(userProfileId))
-        .findFirst()
-        .orElseThrow(() -> {
-          String reason = "User Not found with ID: " + userProfileId;
-          LOG.error(reason);
-          return new ResponseStatusException(HttpStatus.NOT_FOUND, reason);
-        });
+    UserProfile userProfileFound = getUserProfileOrThrow(userProfileId);
 
     Map<String, String> metadata = new HashMap<>();
     metadata.put("Content-Type", file.getContentType());
@@ -87,7 +78,28 @@ public class UserProfileService {
     userProfileFound.setUserProfileImageLink(filename);
   }
 
+  private UserProfile getUserProfileOrThrow(UUID userProfileId) {
+    UserProfile userProfileFound = userProfileDataAccessService
+        .getUserProfiles()
+        .stream()
+        .filter(userProfile -> userProfile.getUserProfileId().equals(userProfileId))
+        .findFirst()
+        .orElseThrow(() -> {
+          String reason = "User Not found with ID: " + userProfileId;
+          LOG.error(reason);
+          return new ResponseStatusException(HttpStatus.NOT_FOUND, reason);
+        });
+    return userProfileFound;
+  }
+
   public byte[] downloadUserProfileImage(UUID userProfileId) {
-    return new byte[0];
+    UserProfile userProfileFound = getUserProfileOrThrow(userProfileId);
+    String path = String.format("%s/%s",
+        BucketName.PROFILE_IMAGE.getBucketName(), userProfileId);
+    LOG.info("request recieved " + path);
+//    return fileStore.download(path, userProfileFound.getUserProfileImageLink().toString());
+    return userProfileFound.getUserProfileImageLink()
+        .map(key -> fileStore.download(path, key))
+        .orElse(new byte[0]);
   }
 }
